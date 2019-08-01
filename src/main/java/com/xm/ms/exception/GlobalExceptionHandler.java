@@ -25,6 +25,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)//拦截任何异常 //TOTHINK @ExceptionHandler的作用
     public Result<String> exceptionHandler(HttpServletRequest request, Exception e) {
+        e.printStackTrace();
         if (e instanceof GlobalException) {
             GlobalException ex = (GlobalException) e;
             return Result.error(ex.getCm());
