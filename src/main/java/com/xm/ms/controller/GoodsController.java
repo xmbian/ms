@@ -2,7 +2,9 @@ package com.xm.ms.controller;
 
 import com.xm.ms.domain.MiaoshaUser;
 import com.xm.ms.result.Result;
+import com.xm.ms.service.GoodsService;
 import com.xm.ms.service.MiaoshaUserService;
+import com.xm.ms.vo.GoodsVo;
 import com.xm.ms.vo.LoginVo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * @author xmbian
@@ -34,6 +37,9 @@ public class GoodsController {
     @Autowired
     MiaoshaUserService miaoshaUserService;
 
+    @Autowired
+    GoodsService goodsService;
+
    /* @RequestMapping("/to_list")
     String toList(HttpServletResponse response,Model model,
                    @CookieValue(value = MiaoshaUserService.COOKIE_NAME_TOKEN, required = false) String cookieToken,
@@ -50,6 +56,9 @@ public class GoodsController {
     @RequestMapping("/to_list")
     String toList(Model model, MiaoshaUser user) {
         model.addAttribute("user",user);
+        //查询商品列表
+        List<GoodsVo> goodsList = goodsService.listGoodsVo();
+        model.addAttribute("goodsList",goodsList);
         return "goods_list";
     }
 
