@@ -25,7 +25,14 @@ public class CodeMsg {
     public static CodeMsg MOBILE_NOT_EXIST = new CodeMsg(500214,"手机号不存在");
     public static CodeMsg PASSWORD_ERROR = new CodeMsg(500215,"密码错误");
 
-    //商品模块
+
+    //商品模块5003XX
+
+    //订单模块5004XX
+
+    //秒杀模块5005XX
+    public static CodeMsg MIAO_SHA_OVER = new CodeMsg(500500,"商品已经秒杀完毕");
+    public static CodeMsg REPEATE_MIAOSHA = new CodeMsg(500501,"不能重复秒杀");
 
     private CodeMsg(int code, String msg) {
         this.code = code;

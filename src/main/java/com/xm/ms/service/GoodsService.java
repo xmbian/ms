@@ -2,6 +2,8 @@ package com.xm.ms.service;
 
 import com.xm.ms.dao.GoodsDao;
 import com.xm.ms.dao.MiaoshaUserDao;
+import com.xm.ms.domain.Goods;
+import com.xm.ms.domain.MiaoshaGoods;
 import com.xm.ms.domain.MiaoshaUser;
 import com.xm.ms.exception.GlobalException;
 import com.xm.ms.redis.MiaoshaUserKey;
@@ -38,5 +40,11 @@ public class GoodsService {
 
     public GoodsVo getGoodsVoByGoodsId(long goodsId) {
         return goodsDao.getGoodsVoByGoodsId(goodsId);
+    }
+
+    public void reduceStock(GoodsVo goods) {
+        MiaoshaGoods g = new MiaoshaGoods();
+        g.setGoodsId(goods.getId());
+        goodsDao.reduceStock(g);
     }
 }
