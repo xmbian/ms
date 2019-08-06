@@ -107,6 +107,22 @@ public class RedisService {
     }
 
     /**
+     * 删除
+     */
+    public boolean delete(KeyPrefix prefix, String key){
+        Jedis jedis = null;
+        try {
+            jedis = jedisPool.getResource();
+            //生成真正的key
+            String realKey = prefix.getPrefix() + key;
+            Long ret = jedis.del(realKey);
+            return ret > 0;
+        } finally {
+            returnToPool(jedis);
+        }
+    }
+
+    /**
      *使用fastJson将bean对象转化成字符串
      */
     private <T> String beanToString(T value) {
@@ -128,7 +144,7 @@ public class RedisService {
     /**
      *使用fastJson将字符串转化成bean对象
      */
-    private <T> T stringToBean(String str, Class<T> clazz) {
+    private <T> T stringToBean(String str, Class<T> clazz) {//TOTHINK 如果class是list类型如何写
         if (str == null || str.length() <= 0) {
             return null;
         }
