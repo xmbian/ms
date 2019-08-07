@@ -5,6 +5,7 @@ import com.xm.ms.domain.MiaoshaUser;
 import com.xm.ms.domain.OrderInfo;
 import com.xm.ms.redis.RedisService;
 import com.xm.ms.result.CodeMsg;
+import com.xm.ms.result.Result;
 import com.xm.ms.service.GoodsService;
 import com.xm.ms.service.MiaoshaService;
 import com.xm.ms.service.MiaoshaUserService;
@@ -14,7 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @author xmbian
@@ -45,7 +48,7 @@ public class MiaoshaController {
     /**
      * QPS : 1306
      * 5000 * 10
-     */
+     *//*
     @RequestMapping("/do_miaosha")
     public String list(Model model, MiaoshaUser user,
                        @RequestParam("goodsId")long goodsId) {
@@ -73,5 +76,30 @@ public class MiaoshaController {
         return "order_detail";
 
     }
+*/
 
+    @RequestMapping(value = "/do_miaosha",method = RequestMethod.POST)
+    @ResponseBody
+    public Result<OrderInfo> miaosha(Model model, MiaoshaUser user,
+                       @RequestParam("goodsId")long goodsId) {
+        model.addAttribute("user", user);
+        if (user == null) {
+            return Result.error(CodeMsg.SESSION_ERROR);
+        }
+        //判断库存
+        GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
+        int stock = goods.getStockCount();
+        if (stock <= 0) {//TOTHINK 当多线程访问时，可能会有多个线程同时到达，并且判断库存大于0，此时这几个线程会进行如下操作，这时秒杀库存可能会出现负数。
+            return Result.error(CodeMsg.MIAO_SHA_OVER);
+        }
+        //判断是否已经秒杀到了（不可重复秒杀）
+        MiaoshaOrder order = orderService.getMiaoshaOrderByUserIdGoodsId(user.getId(),goodsId);
+        if (order != null) {
+            return Result.error(CodeMsg.REPEATE_MIAOSHA);
+        }
+        //可以秒杀：1减库存 2下订单 3写入秒杀订单（原子操作）
+        OrderInfo orderInfo = miaoshaService.miaosha(user, goods);
+        return Result.success(orderInfo);
+
+    }
 }
