@@ -4,6 +4,8 @@ import com.xm.ms.dao.OrderDao;
 import com.xm.ms.domain.MiaoshaOrder;
 import com.xm.ms.domain.MiaoshaUser;
 import com.xm.ms.domain.OrderInfo;
+import com.xm.ms.redis.OrderKey;
+import com.xm.ms.redis.RedisService;
 import com.xm.ms.vo.GoodsVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,8 +26,12 @@ public class OrderService {
     @Autowired
     OrderDao orderDao;
 
-    public MiaoshaOrder getMiaoshaOrderByUserIdGoodsId(long UserId, long goodsId) {
-        return orderDao.getMiaoshaOrderByUserIdGoodsId(UserId, goodsId);
+    @Autowired
+    RedisService redisService;
+
+    public MiaoshaOrder getMiaoshaOrderByUserIdGoodsId(long userId, long goodsId) {
+//        return orderDao.getMiaoshaOrderByUserIdGoodsId(UserId, goodsId);
+        return redisService.get(OrderKey.getMiaoshaOrderByUidGid,""+userId+"_"+goodsId,MiaoshaOrder.class);
     }
 
     @Transactional
@@ -45,7 +51,10 @@ public class OrderService {
         miaoshaOrder.setGoodsId(goods.getId());
         miaoshaOrder.setOrderId(orderId);
         miaoshaOrder.setUserId(user.getId());
-        orderDao.insertMiaoshaOrder(miaoshaOrder);
+        orderDao.insertMiaoshaOrder(miaoshaOrder);//miaosha_order表建立唯一索引可有效防止同一用户重复秒杀
+        //秒杀成功写入redis，判断是否重复秒杀即可从redis中取数据，减少了数据库的访问
+        redisService.set(OrderKey.getMiaoshaOrderByUidGid,""+user.getId()+"_"+goods.getId(),miaoshaOrder);
+
         return orderInfo;
     }
 
