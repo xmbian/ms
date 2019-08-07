@@ -6,6 +6,7 @@ import com.xm.ms.redis.RedisService;
 import com.xm.ms.result.Result;
 import com.xm.ms.service.GoodsService;
 import com.xm.ms.service.MiaoshaUserService;
+import com.xm.ms.vo.GoodsDetailVo;
 import com.xm.ms.vo.GoodsVo;
 import com.xm.ms.vo.LoginVo;
 import org.apache.commons.lang3.StringUtils;
@@ -89,7 +90,7 @@ public class GoodsController {
         return html;
     }
 
-    @RequestMapping(value = "/to_detail/{goodsId}", produces = "text/html")
+   /* @RequestMapping(value = "/to_detail/{goodsId}", produces = "text/html")
     @ResponseBody
     public String toDetail(HttpServletResponse response, HttpServletRequest request, Model model, MiaoshaUser user, @PathVariable("goodsId") long goodsId) {
         model.addAttribute("user",user);
@@ -132,7 +133,36 @@ public class GoodsController {
             redisService.set(GoodsKey.getGoodsDetail, ""+goodsId, html);//URL缓存(不同goodsId访问页面不同),缓存时间为60秒
         }
         return html;
-    }
+    }*/
 
+    @RequestMapping(value = "/detail/{goodsId}")
+    @ResponseBody
+    public Result<GoodsDetailVo> toDetail(MiaoshaUser user, @PathVariable("goodsId") long goodsId) {
+        GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
+
+        long startAt = goods.getStartDate().getTime();//转换成毫秒
+        long endAt = goods.getEndDate().getTime();
+        long now = System.currentTimeMillis();//获取当前时间
+
+        int miaoshaStatus = 0;
+        int remainSeconds = 0;
+
+        if(now < startAt) {//秒杀还没开始，倒计时
+            miaoshaStatus = 0;
+            remainSeconds = (int) ((startAt - now)/1000);
+        } else if(now > endAt) { //秒杀已经结束
+            miaoshaStatus = 2;
+            remainSeconds = -1;
+        } else {//秒杀进行时
+            miaoshaStatus = 1;
+            remainSeconds = 0;
+        }
+        GoodsDetailVo vo = new GoodsDetailVo();
+        vo.setGoods(goods);
+        vo.setUser(user);
+        vo.setRemainSeconds(remainSeconds);
+        vo.setMiaoshaStatus(miaoshaStatus);
+        return Result.success(vo);
+    }
 
 }
