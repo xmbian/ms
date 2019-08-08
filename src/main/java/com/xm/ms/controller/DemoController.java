@@ -1,6 +1,7 @@
 package com.xm.ms.controller;
 
 import com.xm.ms.domain.User;
+import com.xm.ms.rabbit.MQSender;
 import com.xm.ms.redis.RedisService;
 import com.xm.ms.redis.UserKey;
 import com.xm.ms.result.CodeMsg;
@@ -99,5 +100,37 @@ public class DemoController {
         user.setName("1111");
         boolean b = redisService.set(UserKey.getById, "" + 1, user);
         return Result.success(b);
+    }
+
+
+    @Autowired
+    MQSender sender;
+
+    @RequestMapping("/mq/header")
+    @ResponseBody
+    public Result<String> header() {
+		sender.sendHeader("hello,...");
+        return Result.success("Hello，world");
+    }
+
+	@RequestMapping("/mq/fanout")
+    @ResponseBody
+    public Result<String> fanout() {
+		sender.sendFanout("hello,...");
+        return Result.success("Hello，world");
+    }
+
+	@RequestMapping("/mq/topic")
+    @ResponseBody
+    public Result<String> topic() {
+		sender.sendTopic("hello,...");
+        return Result.success("Hello，world");
+    }
+
+	@RequestMapping("/mq")
+    @ResponseBody
+    public Result<String> mq() {
+		sender.send("hello,...");
+        return Result.success("Hello，world");
     }
 }

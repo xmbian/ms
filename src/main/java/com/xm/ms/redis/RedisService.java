@@ -125,7 +125,7 @@ public class RedisService {
     /**
      *使用fastJson将bean对象转化成字符串
      */
-    private <T> String beanToString(T value) {
+    public static <T> String beanToString(T value) {
         if (value == null) {
             return null;
         }
@@ -144,7 +144,7 @@ public class RedisService {
     /**
      *使用fastJson将字符串转化成bean对象
      */
-    private <T> T stringToBean(String str, Class<T> clazz) {//TOTHINK 如果class是list类型如何写
+    public static <T> T stringToBean(String str, Class<T> clazz) {//TOTHINK 如果class是list类型如何写
         if (str == null || str.length() <= 0) {
             return null;
         }
