@@ -56,7 +56,7 @@ public class MiaoshaController {
         //判断库存
         GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
         Integer stock = goods.getStockCount();
-        if (stock <= 0) {//think 当多线程访问时，可能会有多个线程同时到达，并且判断库存大于0，此时这几个线程会进行如下操作，这时秒杀库存可能会出现负数。
+        if (stock <= 0) {//TOTHINK 当多线程访问时，可能会有多个线程同时到达，并且判断库存大于0，此时这几个线程会进行如下操作，这时秒杀库存可能会出现负数。
             model.addAttribute("errmsg", CodeMsg.MIAO_SHA_OVER.getMsg());
             return "miaosha_fail";
         }
